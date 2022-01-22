@@ -12,6 +12,7 @@ class Video:
     ):
         self.fps = fps
 
+        print(path)
         probe = ffmpeg.probe(path)
         self.video_info = next(
             (stream for stream in probe["streams"] if stream["codec_type"] == "video"),

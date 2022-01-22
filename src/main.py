@@ -1,20 +1,31 @@
+import asyncio
 import json
 from pathlib import Path
 from random import randint
 from typing import Callable, List
 
-from flask import Flask, abort, redirect, render_template, request, url_for
+from flask import (
+    Flask,
+    abort,
+    redirect,
+    render_template,
+    request,
+    send_from_directory,
+    url_for,
+)
 from werkzeug.utils import secure_filename
 
 from face_detector import FaceDetector
+from frame_processor import StyleTransfer
+from layout_generator import LayoutGenerator
 from structures import ImageData, Segment
 from transcription import split_utterances, transcribe
 from video_processor import Video
-from frame_processor import StyleTransfer
-from layout_generator import LayoutGenerator
-
 
 DEBUG = True
+
+app = Flask(__name__)
+app.config["UPLOAD_FOLDER"] = (Path(".") / "uploads").resolve()
 
 
 def pipe(
@@ -81,9 +92,9 @@ def convert_keyframe_to_obj(segment: Segment) -> None:
     )
 
 
-async def main():
-    video = Video("metaverse_short.mp4")
-    utterances = split_utterances(await transcribe(video.audio))
+def process_video(path: str) -> str:
+    video = Video(path)
+    utterances = split_utterances(asyncio.run(transcribe(video.audio)))
 
     if DEBUG:
         with open("transcript.json", "w") as file:
@@ -105,16 +116,23 @@ async def main():
     for segment in segments:
         layout_generator.add_frame(segment)
 
-    layout_generator.render_frames_to_image("test.png", 1000)
+    layout_generator.render_frames_to_image("./uploads/test.png", 1000)
 
-
-app = Flask(__name__)
-app.config["UPLOAD_FOLDER"] = "uploads"
+    # FIXME: return the path of the finished comic.
+    return "test.png"
 
 
 @app.route("/", methods=["GET"])
 def serve_home():
     return render_template("index.html")
+
+
+@app.route("/uploads/<name>")
+def serve_uploads(name):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], name)
+
+
+app.add_url_rule("/uploads/<name>", endpoint="uploads", build_only=True)
 
 
 @app.after_request
@@ -124,19 +142,21 @@ def chrome_connection_hack(resp):
 
 
 @app.route("/api/submit", methods=["POST"])
-def process_video():
-    print(request.files)
-
+def submit_video_api():
     if "file" not in request.files:
         return abort(400)
 
     data = request.files["file"]
 
-    path = Path(".") / app.config["UPLOAD_FOLDER"] / secure_filename(data.filename)
-    with open(path.resolve(), "wb") as file:
+    # TODO: use tempfile.mkstemp() instead.
+    path = (app.config["UPLOAD_FOLDER"] / secure_filename(data.filename)).resolve()
+
+    with open(path, "wb") as file:
         data.save(file)
 
-    return redirect(url_for("static", filename="test.jpg"))
+    comic_filename = process_video(path)
+
+    return redirect(url_for("uploads", name=comic_filename))
 
 
 if __name__ == "__main__":

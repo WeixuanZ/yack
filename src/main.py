@@ -1,8 +1,10 @@
 import asyncio
+import pickle
 import json
 from pathlib import Path
 from random import randint
 from typing import Callable, List
+from async_timeout import asyncio
 
 from flask import (
     Flask,
@@ -17,6 +19,7 @@ from werkzeug.utils import secure_filename
 
 from face_detector import FaceDetector
 from frame_processor import StyleTransfer
+
 from layout_generator import LayoutGenerator
 from structures import ImageData, Segment
 from transcription import split_utterances, transcribe
@@ -112,14 +115,19 @@ def process_video(path: str) -> str:
         [Segment(**utterance_segment) for utterance_segment in utterances]
     )
 
-    layout_generator = LayoutGenerator()
     for segment in segments:
-        layout_generator.add_frame(segment)
+        segment.keyframe = None
+        segment.frames = None
 
-    layout_generator.render_frames_to_image("./uploads/test.png", 1000)
+    pickle.dump(segments, open("cache.pickle", "wb+"))
 
+    layout = LayoutGenerator()
+    for segment in segments:
+        layout.add_frame(segment)
+
+    layout.render_frames_to_image("test.svg")
     # FIXME: return the path of the finished comic.
-    return "test.png"
+    return "test.svg"
 
 
 @app.route("/", methods=["GET"])
@@ -160,4 +168,5 @@ def submit_video_api():
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=8000, debug=True, threaded=True)
+    # app.run(host="127.0.0.1", port=8000, debug=True, threaded=True)
+    asyncio.run(main())

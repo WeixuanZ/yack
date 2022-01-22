@@ -152,7 +152,7 @@ class LayoutGenerator:
             # Get the textbox location
             text_box_lines = textwrap.wrap(frame.transcript, 15)
             text_box = suggest_textbox_location(
-                normalized_frame_rect, text_box_lines, frame.keyframe
+                normalized_frame_rect, text_box_lines, frame.image
             )
             ctx.append(
                 draw.Rectangle(

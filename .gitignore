@@ -133,3 +133,4 @@ cython_debug/
 *.svg
 uploads/
 *.dat
+*.pickle

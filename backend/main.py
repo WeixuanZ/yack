@@ -1,29 +1,34 @@
 import asyncio
 import json
-from typing import Callable
+from typing import Callable, List
+from random import randint
 
 from transcription import transcribe
 from video_processor import Video
 
 
-def pipe(*functions: Callable[..., dict]) -> Callable[..., dict]:
+def pipe(*functions: Callable[[dict], None]) -> Callable[[List[dict]], dict]:
     "Implements function composition."
 
-    def pipeline(**state) -> dict:
-        for function in functions:
-            if ret := function(**state):
-                state.update(ret)
+    def pipeline(segments) -> dict:
+        for segment in segments:
+            for function in functions:
+                function(segment)
 
-        return state
+        return segments
 
     return pipeline
 
 
-def attach_frames(utterances: list, video: Video, **_):
-    for utterance in utterances:
-        utterance["frames"] = video.get_frames(utterance["start"], utterance["end"])
+def attach_frames(video: Video):
+    def attach_to_segment(segment: dict) -> None:
+        segment["frames"] = video.get_frames(segment["start"], segment["end"])
 
-    return {"video": None}
+    return attach_to_segment
+
+
+def get_key_frame_index(segment: dict) -> None:
+    segment["keyframe_index"] = randint(0, segment["frames"].shape[0])
 
 
 async def main():
@@ -33,10 +38,10 @@ async def main():
     with open("transcript.json", "w") as file:
         json.dump(utterances, file, indent=4)
 
-    pipeline = pipe(attach_frames)
-    pipeline(utterances=utterances, video=video)
+    pipeline = pipe(attach_frames(video), get_key_frame_index)
+    segments = pipeline(utterances)
 
-    pass
+    return segments
 
 
 if __name__ == "__main__":

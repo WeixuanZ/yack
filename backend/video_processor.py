@@ -57,9 +57,7 @@ class Video:
         return out
 
     def get_frames(self, start_time: float, end_time: float) -> np.ndarray:
-        return self.frames[
-            int(start_time * self.fps) : int(end_time * self.fps), :, :, :
-        ]
+        return self.frames[int(start_time * self.fps) : int(end_time * self.fps)]
 
 
 if __name__ == "__main__":

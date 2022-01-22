@@ -29,7 +29,10 @@ def suggest_textbox_location(
         )
     else:
         return Rect(
-            normalized_frame_rect.x, normalized_frame_rect.y + height, width, height
+            normalized_frame_rect.x + normalized_frame_rect.width - width,
+            normalized_frame_rect.y + height,
+            width,
+            height,
         )
 
 
@@ -119,13 +122,14 @@ class LayoutGenerator:
             assert isinstance(frame, Segment)
 
             normalized_frame_rect = Rect(
-                rect.x + COMIC_BORDER_WIDTH,
+                rect.x + COMIC_BORDER_WIDTH + COMIC_PADDING,
                 height
                 - COMIC_BORDER_WIDTH
+                - COMIC_PADDING
                 - rect.y
                 - rect.height,  # Top left coordinate system
-                rect.width,
-                rect.height,
+                rect.width - 2 * COMIC_PADDING,
+                rect.height - 2 * COMIC_PADDING,
             )
 
             # Draw the frame

@@ -6,6 +6,7 @@ from structures import FrameData, ImageData, Rect, SpeechData
 COMIC_SPACING_TOLERANCE = 0.2
 COMIC_AREA_MIN = 100 * 50
 COMIC_PADDING = 5
+COMIC_BORDER_WIDTH = 2
 
 
 class UnfilledRegion:
@@ -70,17 +71,34 @@ class LayoutGenerator:
         frame_rects = self.__get_frame_rects_for_rendering(width, 200)
 
         height = 1000
-        ctx = draw.Drawing(width, height, origin=(0, 0), displayInline=False)
+        ctx = draw.Drawing(
+            width + 2 * COMIC_BORDER_WIDTH, height, origin=(0, 0), displayInline=False
+        )
+        ctx.append(
+            draw.Rectangle(
+                COMIC_BORDER_WIDTH,
+                COMIC_BORDER_WIDTH,
+                width,
+                height,
+                fill="#fff",
+                stroke="#000",
+                stroke_width=2 * COMIC_BORDER_WIDTH,
+            )
+        )
         for rect, frame in zip(frame_rects, self.frames):
             print(rect)
             ctx.append(
                 draw.Rectangle(
-                    rect.x,
-                    height - rect.y - rect.height,
+                    rect.x + COMIC_BORDER_WIDTH,
+                    height
+                    - COMIC_BORDER_WIDTH
+                    - rect.y
+                    - rect.height,  # Top left coordinate system
                     rect.width,
                     rect.height,
-                    stroke="#F00",
-                    fill=None,
+                    stroke="#000",
+                    stroke_width=2 * COMIC_BORDER_WIDTH,
+                    fill="rgba(0, 0, 0, 0)",
                 )
             )
 

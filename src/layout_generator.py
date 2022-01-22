@@ -117,7 +117,7 @@ class LayoutGenerator:
                     normalized_frame_rect.y,
                     normalized_frame_rect.width,
                     normalized_frame_rect.height,
-                    path=frame.keyframe.uri,
+                    path=frame.image.uri,
                 )
             )
             ctx.append(
@@ -134,7 +134,7 @@ class LayoutGenerator:
 
             # Get the textbox location
             text_box = suggest_textbox_location(
-                normalized_frame_rect, frame.transcript, frame.keyframe
+                normalized_frame_rect, frame.transcript, frame.image
             )
             ctx.append(
                 draw.Rectangle(
@@ -158,7 +158,7 @@ class LayoutGenerator:
         unfilled = UnfilledRegion(Rect(0, 0, page_width, max_height))
         for frame in self.frames:
             assert isinstance(frame, Segment)
-            frame_rect = unfilled.claim_chunk(frame.keyframe.rect.aspect)
+            frame_rect = unfilled.claim_chunk(frame.image.rect.aspect)
             if frame_rect is None:
                 # Failed to claim the chunk: the frame is too large to display in this layout block
                 unfilled = UnfilledRegion(
@@ -166,7 +166,7 @@ class LayoutGenerator:
                         0, unfilled.get_last_unfilled_position(), page_width, max_height
                     )
                 )
-                frame_rect = unfilled.claim_chunk(frame.keyframe.rect.aspect)
+                frame_rect = unfilled.claim_chunk(frame.image.rect.aspect)
                 assert frame_rect is not None
 
             frame_rects.append(frame_rect)

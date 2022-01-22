@@ -43,16 +43,41 @@ def get_key_frame_index(segment: Segment) -> None:
     segment.keyframe_index = randint(0, segment.frames.shape[0] - 1)
 
 
-def process_keyframe(segment: Segment) -> None:
+def detect_speaker(segment: Segment) -> None:
     face_detector = FaceDetector()
-    transfer_style = StyleTransfer()
-    keyframe = segment.frames[segment.keyframe_index]
-    keyframe = transfer_style(keyframe)
-    speaker_loc, speakers_bbox = face_detector.find_speaker_face(keyframe)
 
-    segment.speaker_location = speaker_loc
-    segment.keyframe = ImageData(
-        image_data_matrix=keyframe, image_subject=speakers_bbox
+    segment.keyframe = segment.frames[segment.keyframe_index]
+    segment.speaker_location, segment.speakers_bbox = face_detector.find_speaker_face(
+        segment.keyframe
+    )
+
+
+def crop_keyframe(segment: Segment) -> None:
+    subject_bbox_center = segment.speakers_bbox.center
+
+    if subject_bbox_center[0] > segment.keyframe.shape[0] // 2:
+        segment.keyframe = segment.keyframe[
+            : int(segment.speakers_bbox.x + segment.speakers_bbox.width), :, :
+        ]
+    else:
+        segment.keyframe = segment.keyframe[int(segment.speakers_bbox.x) :, :, :]
+
+    if subject_bbox_center[1] > segment.keyframe.shape[1] // 2:
+        segment.keyframe = segment.keyframe[
+            :, : int(segment.speakers_bbox.y + segment.speakers_bbox.height), :
+        ]
+    else:
+        segment.keyframe = segment.keyframe[:, int(segment.speakers_bbox.y) :, :]
+
+
+def transfer_keyframe_style(segment: Segment) -> None:
+    transfer_style = StyleTransfer()
+    segment.keyframe = transfer_style(segment.keyframe)
+
+
+def convert_keyframe_to_obj(segment: Segment) -> None:
+    segment.image = ImageData(
+        image_data_matrix=segment.keyframe, image_subject=segment.speakers_bbox
     )
 
 
@@ -64,7 +89,14 @@ async def main():
         with open("transcript.json", "w") as file:
             json.dump(utterances, file, indent=4)
 
-    pipeline = pipe(attach_frames(video), get_key_frame_index, process_keyframe)
+    pipeline = pipe(
+        attach_frames(video),
+        get_key_frame_index,
+        detect_speaker,
+        crop_keyframe,
+        transfer_keyframe_style,
+        convert_keyframe_to_obj,
+    )
     segments = pipeline(
         [Segment(**utterance_segment) for utterance_segment in utterances]
     )

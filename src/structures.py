@@ -18,6 +18,7 @@ class Rect:
             self.aspect = width / height
 
         self.area = width * height
+        self.center = (self.x + self.width // 2, self.y + self.height // 2)
 
     def __repr__(self) -> str:
         x, y, width, height = self.x, self.y, self.width, self.height
@@ -47,8 +48,10 @@ class Segment:
         speaker: int,
         frames: np.ndarray = None,
         keyframe_index: int = None,
-        keyframe: ImageData = None,
+        keyframe: np.ndarray = None,
         speaker_location: Rect = None,
+        speakers_bbox: Rect = None,
+        image: ImageData = None,
     ):
         self.start = start
         self.end = end
@@ -59,3 +62,5 @@ class Segment:
         self.keyframe_index = keyframe_index
         self.keyframe = keyframe
         self.speaker_location = speaker_location
+        self.speakers_bbox = speakers_bbox
+        self.image = image

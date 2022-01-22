@@ -1,12 +1,23 @@
 import numpy as np
 import drawSvg as draw
 
-from structures import FrameData, ImageData, Rect, SpeechData
+from structures import Segment, ImageData, Rect
 
 COMIC_SPACING_TOLERANCE = 0.2
 COMIC_AREA_MIN = 100 * 50
 COMIC_PADDING = 5
 COMIC_BORDER_WIDTH = 2
+
+
+def suggest_textbox_location(normalized_frame_rect: Rect, text, image: ImageData):
+    WIDTH = 20
+    HEIGHT = 20
+    left_space = image.subject.x
+    right_space = image.rect.width - image.subject.x + image.subject.width
+    if left_space > right_space:
+        return Rect(normalized_frame_rect.x, normalized_frame_rect.y, WIDTH, HEIGHT)
+    else:
+        return Rect(normalized_frame_rect.x, normalized_frame_rect.y, WIDTH, HEIGHT)
 
 
 class UnfilledRegion:
@@ -64,7 +75,7 @@ class LayoutGenerator:
     def __init__(self):
         self.frames = []
 
-    def add_frame(self, frame: FrameData):
+    def add_frame(self, frame: Segment):
         self.frames.append(frame)
 
     def render_frames_to_image(self, file_name: str, width: int):
@@ -87,29 +98,56 @@ class LayoutGenerator:
         )
         for rect, frame in zip(frame_rects, self.frames):
             assert isinstance(rect, Rect)
-            assert isinstance(frame, FrameData)
+            assert isinstance(frame, Segment)
 
-            print(rect)
-            out_x = rect.x + COMIC_BORDER_WIDTH
-            out_y = (
-                height - COMIC_BORDER_WIDTH - rect.y - rect.height
-            )  # Top left coordinate system
-            out_width = rect.width
-            out_height = rect.height
+            normalized_frame_rect = Rect(
+                rect.x + COMIC_BORDER_WIDTH,
+                height
+                - COMIC_BORDER_WIDTH
+                - rect.y
+                - rect.height,  # Top left coordinate system
+                rect.width,
+                rect.height,
+            )
 
+            # Draw the frame
             ctx.append(
-                draw.Image(out_x, out_y, out_width, out_height, path=frame.image.uri)
+                draw.Image(
+                    normalized_frame_rect.x,
+                    normalized_frame_rect.y,
+                    normalized_frame_rect.width,
+                    normalized_frame_rect.height,
+                    path=frame.keyframe.uri,
+                )
             )
             ctx.append(
                 draw.Rectangle(
-                    out_x,
-                    out_y,
-                    out_width,
-                    out_height,
+                    normalized_frame_rect.x,
+                    normalized_frame_rect.y,
+                    normalized_frame_rect.width,
+                    normalized_frame_rect.height,
                     stroke="#000",
                     stroke_width=2 * COMIC_BORDER_WIDTH,
                     fill="rgba(0, 0, 0, 0)",
                 )
+            )
+
+            # Get the textbox location
+            text_box = suggest_textbox_location(
+                normalized_frame_rect, frame.transcript, frame.keyframe
+            )
+            ctx.append(
+                draw.Rectangle(
+                    text_box.x,
+                    text_box.y,
+                    text_box.width,
+                    text_box.height,
+                    fill="white",
+                )
+            )
+
+            ctx.append(
+                draw.Text(frame.transcript, 10, x=text_box.x, y=text_box.y, fill="#fff")
             )
 
         ctx.setPixelScale(1)
@@ -119,8 +157,8 @@ class LayoutGenerator:
         frame_rects = []
         unfilled = UnfilledRegion(Rect(0, 0, page_width, max_height))
         for frame in self.frames:
-            assert isinstance(frame, FrameData)
-            frame_rect = unfilled.claim_chunk(frame.image.rect.aspect)
+            assert isinstance(frame, Segment)
+            frame_rect = unfilled.claim_chunk(frame.keyframe.rect.aspect)
             if frame_rect is None:
                 # Failed to claim the chunk: the frame is too large to display in this layout block
                 unfilled = UnfilledRegion(
@@ -128,7 +166,7 @@ class LayoutGenerator:
                         0, unfilled.get_last_unfilled_position(), page_width, max_height
                     )
                 )
-                frame_rect = unfilled.claim_chunk(frame.image.rect.aspect)
+                frame_rect = unfilled.claim_chunk(frame.keyframe.rect.aspect)
                 assert frame_rect is not None
 
             frame_rects.append(frame_rect)
@@ -137,22 +175,34 @@ class LayoutGenerator:
 
 
 if __name__ == "__main__":
-    data1 = FrameData(
+    data1 = Segment(
         0,
-        ImageData(np.zeros((100, 100)), Rect(40, 40, 50, 50)),
-        SpeechData("Hello world"),
-        Rect(40, 40, 1, 1),
-    )
-    data2 = FrameData(
+        0,
+        "Hello world",
+        0,
+        None,
         0,
         ImageData(np.zeros((200, 100)), Rect(40, 40, 50, 50)),
-        SpeechData("Hello world"),
         Rect(40, 40, 1, 1),
     )
-    data3 = FrameData(
+    data2 = Segment(
+        0,
+        0,
+        "Hello world",
+        0,
+        None,
+        0,
+        ImageData(np.zeros((100, 100)), Rect(40, 40, 50, 50)),
+        Rect(40, 40, 1, 1),
+    )
+    data3 = Segment(
+        0,
+        0,
+        "Hello world",
+        0,
+        None,
         0,
         ImageData(np.zeros((100, 200)), Rect(40, 40, 50, 50)),
-        SpeechData("Hello world"),
         Rect(40, 40, 1, 1),
     )
 

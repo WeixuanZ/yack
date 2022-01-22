@@ -59,6 +59,3 @@ class Segment:
         self.keyframe_index = keyframe_index
         self.keyframe = keyframe
         self.speaker_location = speaker_location
-
-
-FrameData = Segment

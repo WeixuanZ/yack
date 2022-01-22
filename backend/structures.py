@@ -6,6 +6,11 @@ class Rect:
         self.height = height
 
         self.aspect = width / height
+        self.area = width * height
+
+    def __repr__(self) -> str:
+        x, y, width, height = self.x, self.y, self.width, self.height
+        return f"{x=}, {y=}, {width=}, {height=}"
 
 
 class ImageData:

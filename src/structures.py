@@ -1,5 +1,4 @@
-from pathlib import Path
-import tempfile
+import base64
 
 import cv2
 import numpy as np
@@ -29,10 +28,9 @@ class ImageData:
     def __init__(
         self, image_data_matrix, image_subject: Rect, image_importance=None
     ) -> None:
-        _, self.uri = tempfile.mkstemp(
-            suffix=".png", dir=(Path(".") / "uploads").as_posix()
-        )
-        cv2.imwrite(self.uri, image_data_matrix)
+        _, buffer = cv2.imencode(".png", image_data_matrix)
+        self.b64png = base64.standard_b64encode(buffer)
+
         self.data = image_data_matrix
         self.subject = image_subject
         self.rect = Rect(0, 0, image_data_matrix.shape[1], image_data_matrix.shape[0])

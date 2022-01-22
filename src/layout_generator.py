@@ -1,4 +1,3 @@
-import base64
 import textwrap
 
 import drawSvg as draw
@@ -130,16 +129,15 @@ class LayoutGenerator:
             )
 
             # Draw the frame
-            with open(frame.image.uri, "rb") as image:
-                ctx.append(
-                    draw.Image(
-                        normalized_frame_rect.x,
-                        normalized_frame_rect.y,
-                        normalized_frame_rect.width,
-                        normalized_frame_rect.height,
-                        path=f"data:image/png;base64,{base64.standard_b64encode(image.read()).decode('ascii')}",
-                    )
+            ctx.append(
+                draw.Image(
+                    normalized_frame_rect.x,
+                    normalized_frame_rect.y,
+                    normalized_frame_rect.width,
+                    normalized_frame_rect.height,
+                    path=f"data:image/png;base64,{frame.image.b64png.decode('ascii')}",
                 )
+            )
 
             ctx.append(
                 draw.Rectangle(

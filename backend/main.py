@@ -3,7 +3,7 @@ import json
 from typing import Callable, List
 from random import randint
 
-from transcription import transcribe
+from transcription import transcribe, split_utterances
 from video_processor import Video
 
 
@@ -33,7 +33,7 @@ def get_key_frame_index(segment: dict) -> None:
 
 async def main():
     video = Video("metaverse_short.mp4")
-    utterances = await transcribe(video.audio)
+    utterances = split_utterances(await transcribe(video.audio))
 
     with open("transcript.json", "w") as file:
         json.dump(utterances, file, indent=4)

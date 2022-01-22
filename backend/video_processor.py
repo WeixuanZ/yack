@@ -1,3 +1,4 @@
+from operator import truediv
 import ffmpeg
 import numpy as np
 
@@ -26,7 +27,7 @@ class Video:
         )
         if self.audio_info is None:
             raise RuntimeError("Video does not have audio")
-        if self.fps > self.video_info["avg_frame_rate"]:
+        if self.fps > truediv(*map(int, self.video_info["avg_frame_rate"].split("/"))):
             print("[WARNING] Specified fps higher than raw")
 
         if not audio_only:
@@ -46,7 +47,7 @@ class Video:
         return np.frombuffer(out, np.uint8).reshape([-1, height, width, 3])
 
     @staticmethod
-    def load_audio(path):
+    def load_audio(path) -> bytes:
         out, _ = (
             ffmpeg.input(path)
             .output("-", format="wav")
@@ -55,7 +56,7 @@ class Video:
 
         return out
 
-    def get_frames(self, start_time: float, end_time: float):
+    def get_frames(self, start_time: float, end_time: float) -> np.ndarray:
         return self.frames[
             int(start_time * self.fps) : int(end_time * self.fps), :, :, :
         ]

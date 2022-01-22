@@ -132,3 +132,4 @@ cython_debug/
 *.png
 *.svg
 uploads/
+*.dat

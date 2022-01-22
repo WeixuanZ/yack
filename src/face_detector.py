@@ -2,7 +2,6 @@ from pathlib import Path
 
 import cv2
 import dlib
-import imutils
 from imutils import face_utils
 
 from structures import Rect
@@ -25,19 +24,15 @@ class FaceDetector:
         return ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) ** 0.5
 
     def find_speaker_face(self, frame):
-        source_width = frame.shape[0]
-        scaling_ratio = source_width / 500
-
-        frame = imutils.resize(frame, width=500)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         rects = self.DETECTOR(gray, 1)
 
         # this is the default speaker face position
         speaker_face = Rect(
-            ((frame.shape[0] // 2) - 10) * scaling_ratio,
-            ((frame.shape[1] // 2) - 10) * scaling_ratio,
-            ((frame.shape[0] // 2) + 10) * scaling_ratio,
-            ((frame.shape[1] // 2) + 10) * scaling_ratio,
+            ((frame.shape[0] // 2) - 10),
+            ((frame.shape[1] // 2) - 10),
+            ((frame.shape[0] // 2) + 10),
+            ((frame.shape[1] // 2) + 10),
         )
 
         speaker_mouth_ratio = 0.0
@@ -74,10 +69,10 @@ class FaceDetector:
             if (mouth_open / mouth_width) > speaker_mouth_ratio:
                 speaker_mouth_ratio = mouth_open / mouth_width
                 speaker_face = Rect(
-                    x * scaling_ratio,
-                    y * scaling_ratio,
-                    w * scaling_ratio,
-                    h * scaling_ratio,
+                    x,
+                    y,
+                    w,
+                    h,
                 )
 
         if min_x > max_x:
@@ -85,10 +80,10 @@ class FaceDetector:
             max_y = min_y
 
         speakers_bb = Rect(
-            min_x * scaling_ratio,
-            min_y * scaling_ratio,
-            (max_x - min_x) * scaling_ratio,
-            (max_y - min_y) * scaling_ratio,
+            min_x,
+            min_y,
+            (max_x - min_x),
+            (max_y - min_y),
         )
 
         return speaker_face, speakers_bb

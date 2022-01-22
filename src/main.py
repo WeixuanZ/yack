@@ -68,19 +68,21 @@ def detect_speaker(segment: Segment) -> None:
 def crop_keyframe(segment: Segment) -> None:
     subject_bbox_center = segment.speakers_bbox.center
 
+    # TODO: add margins
+
     if subject_bbox_center[0] > segment.keyframe.shape[0] // 2:
         segment.keyframe = segment.keyframe[
-            : int(segment.speakers_bbox.x + segment.speakers_bbox.width), :, :
+            :, : int(segment.speakers_bbox.x + segment.speakers_bbox.width), :
         ]
     else:
-        segment.keyframe = segment.keyframe[int(segment.speakers_bbox.x) :, :, :]
+        segment.keyframe = segment.keyframe[:, int(segment.speakers_bbox.x) :, :]
 
     if subject_bbox_center[1] > segment.keyframe.shape[1] // 2:
         segment.keyframe = segment.keyframe[
-            :, : int(segment.speakers_bbox.y + segment.speakers_bbox.height), :
+            : int(segment.speakers_bbox.y + segment.speakers_bbox.height), :, :
         ]
     else:
-        segment.keyframe = segment.keyframe[:, int(segment.speakers_bbox.y) :, :]
+        segment.keyframe = segment.keyframe[int(segment.speakers_bbox.y) :, :, :]
 
 
 def transfer_keyframe_style(segment: Segment) -> None:

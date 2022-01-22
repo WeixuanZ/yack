@@ -11,7 +11,7 @@ class Video:
             (stream for stream in probe["streams"] if stream["codec_type"] == "video"),
             None,
         )
-        self.auto_info = next(
+        self.audio_info = next(
             (stream for stream in probe["streams"] if stream["codec_type"] == "audio"),
             None,
         )

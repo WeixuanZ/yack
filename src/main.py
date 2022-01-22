@@ -10,6 +10,9 @@ from transcription import split_utterances, transcribe
 from video_processor import Video
 
 
+DEBUG = True
+
+
 def pipe(
     *functions: Callable[[Segment], None]
 ) -> Callable[[List[Segment]], List[Segment]]:
@@ -49,8 +52,9 @@ async def main():
     video = Video("metaverse_short.mp4")
     utterances = split_utterances(await transcribe(video.audio))
 
-    with open("transcript.json", "w") as file:
-        json.dump(utterances, file, indent=4)
+    if DEBUG:
+        with open("transcript.json", "w") as file:
+            json.dump(utterances, file, indent=4)
 
     pipeline = pipe(attach_frames(video), get_key_frame_index, process_keyframe)
     segments = pipeline(

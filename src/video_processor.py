@@ -7,13 +7,9 @@ class Video:
     def __init__(
         self,
         path: str,
-        height: int = 500,
-        width: int = 600,
         fps: int = 1,
         audio_only: bool = False,
     ):
-        self.width = width
-        self.height = height
         self.fps = fps
 
         probe = ffmpeg.probe(path)
@@ -31,16 +27,17 @@ class Video:
             print("[WARNING] Specified fps higher than raw")
 
         if not audio_only:
-            self.frames = self.load_frames(path, self.height, self.width, self.fps)
+            self.frames = self.load_frames(
+                path, self.video_info["height"], self.video_info["width"], self.fps
+            )
         self.audio = self.load_audio(path)
 
     @staticmethod
     def load_frames(path: str, height: int, width: int, fps: int) -> np.ndarray:
         out, _ = (
             ffmpeg.input(path)
-            .filter("scale", width, height)
             .filter("fps", fps)
-            .output("pipe:", format="rawvideo", pix_fmt="rgb24")
+            .output("pipe:", format="rawvideo", pix_fmt="bgr24")
             .run(capture_stdout=True, capture_stderr=True)
         )
 

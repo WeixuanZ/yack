@@ -3,9 +3,18 @@ import numpy as np
 
 
 class Video:
-    def __init__(self, path: str, height: int = 500, width: int = 600):
+    def __init__(
+        self,
+        path: str,
+        height: int = 500,
+        width: int = 600,
+        fps: int = 1,
+        audio_only: bool = False,
+    ):
         self.width = width
         self.height = height
+        self.fps = fps
+
         probe = ffmpeg.probe(path)
         self.video_info = next(
             (stream for stream in probe["streams"] if stream["codec_type"] == "video"),
@@ -15,17 +24,23 @@ class Video:
             (stream for stream in probe["streams"] if stream["codec_type"] == "audio"),
             None,
         )
+        if self.audio_info is None:
+            raise RuntimeError("Video does not have audio")
+        if self.fps > self.video_info["avg_frame_rate"]:
+            print("[WARNING] Specified fps higher than raw")
 
-        self.frames = self.load_frames(path, self.height, self.width)
+        if not audio_only:
+            self.frames = self.load_frames(path, self.height, self.width, self.fps)
         self.audio = self.load_audio(path)
 
     @staticmethod
-    def load_frames(path: str, height: int, width: int) -> np.ndarray:
+    def load_frames(path: str, height: int, width: int, fps: int) -> np.ndarray:
         out, _ = (
             ffmpeg.input(path)
             .filter("scale", width, height)
+            .filter("fps", fps)
             .output("pipe:", format="rawvideo", pix_fmt="rgb24")
-            .run(capture_stdout=True)
+            .run(capture_stdout=True, capture_stderr=True)
         )
 
         return np.frombuffer(out, np.uint8).reshape([-1, height, width, 3])
@@ -41,10 +56,11 @@ class Video:
         return out
 
     def get_frames(self, start_time: float, end_time: float):
-        avg_fps = self.video_info["avg_frame_rate"]
-        return self.frames[int(start_time * avg_fps) : int(end_time * avg_fps), :, :, :]
+        return self.frames[
+            int(start_time * self.fps) : int(end_time * self.fps), :, :, :
+        ]
 
 
 if __name__ == "__main__":
-    video = Video("test.mp4")
+    video = Video("test.mp4", fps=5)
     print(video.frames.shape)

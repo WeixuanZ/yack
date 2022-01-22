@@ -1,6 +1,7 @@
-import cv2
+import os
 import random
 
+import cv2
 import numpy as np
 
 
@@ -27,7 +28,9 @@ class ImageData:
     def __init__(
         self, image_data_matrix, image_subject: Rect, image_importance=None
     ) -> None:
-        self.uri = f"../data/temp{random.randint(0, 1<<30)}.png"
+        self.uri = f"./tmp/{random.randint(0, 1<<30)}.png"
+        if not os.path.exists("./tmp"):
+            os.makedirs("./tmp/")
         cv2.imwrite(self.uri, image_data_matrix)
         self.data = image_data_matrix
         self.subject = image_subject

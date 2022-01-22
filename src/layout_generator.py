@@ -1,23 +1,35 @@
+import textwrap
 import numpy as np
 import drawSvg as draw
 
 from structures import Segment, ImageData, Rect
 
+COMIC_WIDTH = 500
+COMIC_MAX_SEGMENT_HEIGHT = 180
 COMIC_SPACING_TOLERANCE = 0.2
-COMIC_AREA_MIN = 100 * 50
+COMIC_AREA_MIN = 100 * 100
 COMIC_PADDING = 5
 COMIC_BORDER_WIDTH = 2
+BODGE_PT_TO_PX_CONVERSION_X = 6
+BODGE_PT_TO_PX_CONVERSION_Y = 10
 
 
-def suggest_textbox_location(normalized_frame_rect: Rect, text, image: ImageData):
-    WIDTH = 20
-    HEIGHT = 20
+def suggest_textbox_location(
+    normalized_frame_rect: Rect, wrapped_textbox_lines, image: ImageData
+):
+    width = len(wrapped_textbox_lines[0]) * BODGE_PT_TO_PX_CONVERSION_X
+    height = len(wrapped_textbox_lines) * BODGE_PT_TO_PX_CONVERSION_Y
+
     left_space = image.subject.x
     right_space = image.rect.width - image.subject.x + image.subject.width
     if left_space > right_space:
-        return Rect(normalized_frame_rect.x, normalized_frame_rect.y, WIDTH, HEIGHT)
+        return Rect(
+            normalized_frame_rect.x, normalized_frame_rect.y + height, width, height
+        )
     else:
-        return Rect(normalized_frame_rect.x, normalized_frame_rect.y, WIDTH, HEIGHT)
+        return Rect(
+            normalized_frame_rect.x, normalized_frame_rect.y + height, width, height
+        )
 
 
 class UnfilledRegion:
@@ -78,18 +90,23 @@ class LayoutGenerator:
     def add_frame(self, frame: Segment):
         self.frames.append(frame)
 
-    def render_frames_to_image(self, file_name: str, width: int):
-        frame_rects = self.__get_frame_rects_for_rendering(width, 200)
+    def render_frames_to_image(self, file_name: str):
+        frame_rects = self.__get_frame_rects_for_rendering(
+            COMIC_WIDTH, COMIC_MAX_SEGMENT_HEIGHT
+        )
 
-        height = 1000
+        height = 2000
         ctx = draw.Drawing(
-            width + 2 * COMIC_BORDER_WIDTH, height, origin=(0, 0), displayInline=False
+            COMIC_WIDTH + 2 * COMIC_BORDER_WIDTH,
+            height,
+            origin=(0, 0),
+            displayInline=False,
         )
         ctx.append(
             draw.Rectangle(
                 COMIC_BORDER_WIDTH,
                 COMIC_BORDER_WIDTH,
-                width,
+                COMIC_WIDTH,
                 height,
                 fill="#fff",
                 stroke="#000",
@@ -133,8 +150,9 @@ class LayoutGenerator:
             )
 
             # Get the textbox location
+            text_box_lines = textwrap.wrap(frame.transcript, 15)
             text_box = suggest_textbox_location(
-                normalized_frame_rect, frame.transcript, frame.image
+                normalized_frame_rect, text_box_lines, frame.keyframe
             )
             ctx.append(
                 draw.Rectangle(
@@ -147,11 +165,18 @@ class LayoutGenerator:
             )
 
             ctx.append(
-                draw.Text(frame.transcript, 10, x=text_box.x, y=text_box.y, fill="#fff")
+                draw.Text(
+                    text_box_lines,
+                    10,
+                    x=text_box.x,
+                    y=text_box.y + text_box.height,
+                    fill="#000",
+                    valign="top",
+                )
             )
 
         ctx.setPixelScale(1)
-        ctx.savePng(file_name)
+        ctx.saveSvg(file_name)
 
     def __get_frame_rects_for_rendering(self, page_width: int, max_height: int):
         frame_rects = []

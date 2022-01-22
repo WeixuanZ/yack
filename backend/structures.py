@@ -1,7 +1,20 @@
+class Rect:
+    def __init__(self, x, y, width, height) -> None:
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+
+        self.aspect = width / height
+
+
 class ImageData:
-    def __init__(self, image_data_matrix, image_importance=None) -> None:
-        self.aspect = image_data_matrix.shape[0] / image_data_matrix.shape[1]
+    def __init__(
+        self, image_data_matrix, image_subject: Rect, image_importance=None
+    ) -> None:
         self.data = image_data_matrix
+        self.subject = image_subject
+        self.rect = Rect(0, 0, image_data_matrix.shape[0], image_data_matrix.shape[1])
         self.priority = image_importance
 
 
@@ -16,7 +29,7 @@ class FrameData:
         timestamp: float,
         image: ImageData,
         speech: SpeechData,
-        speaker_location=None,
+        speaker_location: Rect = None,
     ) -> None:
         self.timestamp = timestamp
         self.image = image

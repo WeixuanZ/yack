@@ -3,7 +3,7 @@ import json
 from typing import Callable
 
 from transcription import transcribe
-from video_processor import Video, attach_frames
+from video_processor import Video
 
 
 def pipe(*functions: Callable[..., dict]) -> Callable[..., dict]:
@@ -17,6 +17,13 @@ def pipe(*functions: Callable[..., dict]) -> Callable[..., dict]:
         return state
 
     return pipeline
+
+
+def attach_frames(utterances: list, video: Video, **_):
+    for utterance in utterances:
+        utterance["frames"] = video.get_frames(utterance["start"], utterance["end"])
+
+    return {"video": None}
 
 
 async def main():

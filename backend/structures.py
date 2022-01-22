@@ -1,6 +1,8 @@
 import cv2
 import random
 
+import numpy as np
+
 
 class Rect:
     def __init__(self, x, y, width, height) -> None:
@@ -33,20 +35,27 @@ class ImageData:
         self.priority = image_importance
 
 
-class SpeechData:
-    def __init__(self, speech_text) -> None:
-        self.speech_text = speech_text
-
-
-class FrameData:
+class Segment:
     def __init__(
         self,
-        timestamp: float,
-        image: ImageData,
-        speech: SpeechData,
+        start: float,
+        end: float,
+        transcript: str,
+        speaker: int,
+        frames: np.ndarray = None,
+        keyframe_index: int = None,
+        keyframe: ImageData = None,
         speaker_location: Rect = None,
-    ) -> None:
-        self.timestamp = timestamp
-        self.image = image
-        self.speech = speech
+    ):
+        self.start = start
+        self.end = end
+        self.transcript = transcript
+        self.speaker = speaker
+
+        self.frames = frames
+        self.keyframe_index = keyframe_index
+        self.keyframe = keyframe
         self.speaker_location = speaker_location
+
+
+FrameData = Segment

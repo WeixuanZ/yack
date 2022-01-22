@@ -1,3 +1,4 @@
+import os
 import imutils
 from imutils import face_utils
 import dlib
@@ -10,7 +11,9 @@ class FaceDetector:
     def __init__(self):
         self.DETECTOR = dlib.get_frontal_face_detector()
         self.PREDICTOR = dlib.shape_predictor(
-            r".\dlib_shape_predictor\shape_predictor_68_face_landmarks.dat"
+            os.path.join(
+                "dlib_shape_predictor", "shape_predictor_68_face_landmarks.dat"
+            )
         )
 
     @staticmethod

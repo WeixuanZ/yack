@@ -1,12 +1,13 @@
-import asyncio
 import json
-from typing import Callable, List
 from random import randint
+from typing import Callable, List
 
-from structures import ImageData, Segment
-from transcription import transcribe, split_utterances
-from video_processor import Video
+from flask import Flask, render_template
+
 from face_detector import FaceDetector
+from structures import ImageData, Segment
+from transcription import split_utterances, transcribe
+from video_processor import Video
 
 
 def pipe(
@@ -59,5 +60,19 @@ async def main():
     return segments
 
 
+app = Flask(__name__)
+
+
+@app.route("/", methods=["GET"])
+def serve_home():
+    return render_template("index.html")
+
+
+@app.after_request
+def chrome_connection_hack(resp):
+    resp.headers["Connection"] = "close"
+    return resp
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    app.run(host="127.0.0.1", port=8000, debug=True, threaded=True)

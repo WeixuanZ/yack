@@ -1,8 +1,10 @@
+import base64
 import textwrap
-import numpy as np
-import drawSvg as draw
 
-from structures import Segment, ImageData, Rect
+import drawSvg as draw
+import numpy as np
+
+from structures import ImageData, Rect, Segment
 
 COMIC_WIDTH = 500
 COMIC_MAX_SEGMENT_HEIGHT = 180
@@ -128,15 +130,17 @@ class LayoutGenerator:
             )
 
             # Draw the frame
-            ctx.append(
-                draw.Image(
-                    normalized_frame_rect.x,
-                    normalized_frame_rect.y,
-                    normalized_frame_rect.width,
-                    normalized_frame_rect.height,
-                    path=frame.image.uri,
+            with open(frame.image.uri, "rb") as image:
+                ctx.append(
+                    draw.Image(
+                        normalized_frame_rect.x,
+                        normalized_frame_rect.y,
+                        normalized_frame_rect.width,
+                        normalized_frame_rect.height,
+                        path=f"data:image/png;base64,{base64.standard_b64encode(image.read()).decode('ascii')}",
+                    )
                 )
-            )
+
             ctx.append(
                 draw.Rectangle(
                     normalized_frame_rect.x,

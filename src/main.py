@@ -1,6 +1,7 @@
 import asyncio
 import pickle
 import json
+import tempfile
 from pathlib import Path
 from random import randint
 from typing import Callable, List
@@ -96,7 +97,7 @@ def convert_keyframe_to_obj(segment: Segment) -> None:
     )
 
 
-def process_video(path: str) -> str:
+def process_video(path: Path) -> str:
     video = Video(path)
     utterances = split_utterances(asyncio.run(transcribe(video.audio)))
 
@@ -120,15 +121,16 @@ def process_video(path: str) -> str:
         segment.keyframe = None
         segment.frames = None
 
-    pickle.dump(segments, open("cache.pickle", "wb+"))
-
     layout = LayoutGenerator()
     for segment in segments:
         layout.add_frame(segment)
 
-    layout.render_frames_to_image("test.svg")
-    # FIXME: return the path of the finished comic.
-    return "test.svg"
+    _, path = tempfile.mkstemp(
+        prefix="out", suffix=".svg", dir=app.config["UPLOAD_FOLDER"]
+    )
+    layout.render_frames_to_image(path)
+
+    return Path(path).name
 
 
 @app.route("/", methods=["GET"])
@@ -155,19 +157,15 @@ def submit_video_api():
     if "file" not in request.files:
         return abort(400)
 
+    _, path = tempfile.mkstemp(prefix="in", dir=app.config["UPLOAD_FOLDER"])
+    print(path)
+
     data = request.files["file"]
+    data.save(path)
 
-    # TODO: use tempfile.mkstemp() instead.
-    path = (app.config["UPLOAD_FOLDER"] / secure_filename(data.filename)).resolve()
-
-    with open(path, "wb") as file:
-        data.save(file)
-
-    comic_filename = process_video(path)
-
-    return redirect(url_for("uploads", name=comic_filename))
+    comic_name = process_video(path)
+    return redirect(url_for("uploads", name=comic_name))
 
 
 if __name__ == "__main__":
-    # app.run(host="127.0.0.1", port=8000, debug=True, threaded=True)
-    process_video("metaverse_short.mp4")
+    app.run(host="127.0.0.1", port=8000, debug=True, threaded=True)

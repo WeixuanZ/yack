@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 from random import randint
 from typing import Callable, List
-from async_timeout import asyncio
 
 from flask import (
     Flask,
@@ -169,4 +168,4 @@ def submit_video_api():
 
 if __name__ == "__main__":
     # app.run(host="127.0.0.1", port=8000, debug=True, threaded=True)
-    asyncio.run(main())
+    process_video("metaverse_short.mp4")

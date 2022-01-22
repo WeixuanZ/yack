@@ -86,16 +86,26 @@ class LayoutGenerator:
             )
         )
         for rect, frame in zip(frame_rects, self.frames):
+            assert isinstance(rect, Rect)
+            assert isinstance(frame, FrameData)
+
             print(rect)
+            out_x = rect.x + COMIC_BORDER_WIDTH
+            out_y = (
+                height - COMIC_BORDER_WIDTH - rect.y - rect.height
+            )  # Top left coordinate system
+            out_width = rect.width
+            out_height = rect.height
+
+            ctx.append(
+                draw.Image(out_x, out_y, out_width, out_height, path=frame.image.uri)
+            )
             ctx.append(
                 draw.Rectangle(
-                    rect.x + COMIC_BORDER_WIDTH,
-                    height
-                    - COMIC_BORDER_WIDTH
-                    - rect.y
-                    - rect.height,  # Top left coordinate system
-                    rect.width,
-                    rect.height,
+                    out_x,
+                    out_y,
+                    out_width,
+                    out_height,
                     stroke="#000",
                     stroke_width=2 * COMIC_BORDER_WIDTH,
                     fill="rgba(0, 0, 0, 0)",

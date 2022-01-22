@@ -1,3 +1,7 @@
+import cv2
+import random
+
+
 class Rect:
     def __init__(self, x, y, width, height) -> None:
         self.x = x
@@ -5,7 +9,11 @@ class Rect:
         self.width = width
         self.height = height
 
-        self.aspect = width / height
+        if height == 0:
+            self.aspect = 1000  # ≈∞
+        else:
+            self.aspect = width / height
+
         self.area = width * height
 
     def __repr__(self) -> str:
@@ -17,9 +25,11 @@ class ImageData:
     def __init__(
         self, image_data_matrix, image_subject: Rect, image_importance=None
     ) -> None:
+        self.uri = f"../data/temp{random.randint(0, 1<<30)}.png"
+        cv2.imwrite(self.uri, image_data_matrix)
         self.data = image_data_matrix
         self.subject = image_subject
-        self.rect = Rect(0, 0, image_data_matrix.shape[0], image_data_matrix.shape[1])
+        self.rect = Rect(0, 0, image_data_matrix.shape[1], image_data_matrix.shape[0])
         self.priority = image_importance
 
 

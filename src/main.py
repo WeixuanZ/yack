@@ -8,6 +8,7 @@ from face_detector import FaceDetector
 from structures import ImageData, Segment
 from transcription import split_utterances, transcribe
 from video_processor import Video
+from frame_processor import StyleTransfer
 
 
 DEBUG = True
@@ -41,7 +42,9 @@ def get_key_frame_index(segment: Segment) -> None:
 
 def process_keyframe(segment: Segment) -> None:
     face_detector = FaceDetector()
+    transfer_style = StyleTransfer()
     keyframe = segment.frames[segment.keyframe_index]
+    keyframe = transfer_style(keyframe)
     speaker_loc, speaks_bbox = face_detector.find_speaker_face(keyframe)
 
     segment.speaker_location = speaker_loc

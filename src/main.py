@@ -1,8 +1,10 @@
 import json
+from pathlib import Path
 from random import randint
 from typing import Callable, List
 
-from flask import Flask, render_template
+from flask import Flask, abort, redirect, render_template, request, url_for
+from werkzeug.utils import secure_filename
 
 from face_detector import FaceDetector
 from structures import ImageData, Segment
@@ -68,6 +70,7 @@ async def main():
 
 
 app = Flask(__name__)
+app.config["UPLOAD_FOLDER"] = "uploads"
 
 
 @app.route("/", methods=["GET"])
@@ -79,6 +82,22 @@ def serve_home():
 def chrome_connection_hack(resp):
     resp.headers["Connection"] = "close"
     return resp
+
+
+@app.route("/api/submit", methods=["POST"])
+def process_video():
+    print(request.files)
+
+    if "file" not in request.files:
+        return abort(400)
+
+    data = request.files["file"]
+
+    path = Path(".") / app.config["UPLOAD_FOLDER"] / secure_filename(data.filename)
+    with open(path.resolve(), "wb") as file:
+        data.save(file)
+
+    return redirect(url_for("static", filename="test.jpg"))
 
 
 if __name__ == "__main__":

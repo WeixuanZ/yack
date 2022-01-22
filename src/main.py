@@ -11,6 +11,7 @@ from structures import ImageData, Segment
 from transcription import split_utterances, transcribe
 from video_processor import Video
 from frame_processor import StyleTransfer
+from layout_generator import LayoutGenerator
 
 
 DEBUG = True
@@ -47,10 +48,12 @@ def process_keyframe(segment: Segment) -> None:
     transfer_style = StyleTransfer()
     keyframe = segment.frames[segment.keyframe_index]
     keyframe = transfer_style(keyframe)
-    speaker_loc, speaks_bbox = face_detector.find_speaker_face(keyframe)
+    speaker_loc, speakers_bbox = face_detector.find_speaker_face(keyframe)
 
     segment.speaker_location = speaker_loc
-    segment.keyframe = ImageData(image_data_matrix=keyframe, image_subject=speaks_bbox)
+    segment.keyframe = ImageData(
+        image_data_matrix=keyframe, image_subject=speakers_bbox
+    )
 
 
 async def main():
@@ -66,7 +69,11 @@ async def main():
         [Segment(**utterance_segment) for utterance_segment in utterances]
     )
 
-    return segments
+    layout_generator = LayoutGenerator()
+    for segment in segments:
+        layout_generator.add_frame(segment)
+
+    layout_generator.render_frames_to_image("test.png", 1000)
 
 
 app = Flask(__name__)

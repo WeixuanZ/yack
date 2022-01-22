@@ -28,7 +28,7 @@ def attach_frames(video: Video):
 
 
 def get_key_frame_index(segment: dict) -> None:
-    segment["keyframe_index"] = randint(0, segment["frames"].shape[0])
+    segment["keyframe_index"] = randint(0, segment["frames"].shape[0] - 1)
 
 
 async def main():

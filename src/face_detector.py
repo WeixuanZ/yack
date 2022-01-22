@@ -1,8 +1,9 @@
-import os
+from pathlib import Path
+
+import cv2
+import dlib
 import imutils
 from imutils import face_utils
-import dlib
-import cv2
 
 from structures import Rect
 
@@ -11,9 +12,12 @@ class FaceDetector:
     def __init__(self):
         self.DETECTOR = dlib.get_frontal_face_detector()
         self.PREDICTOR = dlib.shape_predictor(
-            os.path.join(
-                "dlib_shape_predictor", "shape_predictor_68_face_landmarks.dat"
-            )
+            (
+                Path(".")
+                / "src"
+                / "dlib_shape_predictor"
+                / "shape_predictor_68_face_landmarks.dat"
+            ).as_posix()
         )
 
     @staticmethod

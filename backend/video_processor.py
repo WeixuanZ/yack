@@ -62,6 +62,11 @@ class Video:
         ]
 
 
+def attach_frames(utterances: list, video: Video):
+    for utterance in utterances:
+        utterance["frames"] = video.get_frames(utterance["start"], utterance["end"])
+
+
 if __name__ == "__main__":
     video = Video("test.mp4", fps=5)
     print(video.frames.shape)

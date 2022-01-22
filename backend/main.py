@@ -8,9 +8,9 @@ from video_processor import Video
 
 
 def pipe(*functions: Callable[[dict], None]) -> Callable[[List[dict]], dict]:
-    "Implements function composition."
+    """Implements function composition."""
 
-    def pipeline(segments) -> dict:
+    def pipeline(segments) -> List[dict]:
         for segment in segments:
             for function in functions:
                 function(segment)

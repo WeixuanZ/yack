@@ -76,6 +76,19 @@ def split_utterances(
                 utterance["transcript"] += " "
             if utterance["transcript"][-1] not in [".", "!", "?"]:
                 utterance["transcript"] += "..."
+
+            # Add empty frames when there's no dialogue.
+            if out:
+                if utterance["start"] - out[-1]["end"] > pause_len:
+                    out.append(
+                        {
+                            "start": out[-1]["end"],
+                            "end": utterance["start"],
+                            "transcript": "",
+                            "speaker": None,
+                        }
+                    )
+
             out.append(utterance)
             continue
 

@@ -129,8 +129,6 @@ cython_debug/
 .secrets
 *.mp4
 *.json
-*.png
-*.svg
 uploads/
 *.dat
 *.pickle

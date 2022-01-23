@@ -139,15 +139,6 @@ class LayoutGenerator:
         unfilled = UnfilledRegion(Rect(0, 0, page_width, max_height))
         for frame in self.frames:
             assert isinstance(frame, Segment)
-            if not frame.transcript:
-                unfilled = UnfilledRegion(
-                    Rect(
-                        0,
-                        unfilled.get_last_unfilled_position(),
-                        page_width,
-                        2 * max_height,
-                    )
-                )
 
             frame_rect = unfilled.claim_chunk(frame.image.rect.aspect)
             if not frame_rect:
@@ -161,11 +152,5 @@ class LayoutGenerator:
                 assert frame_rect is not None
 
             frame_rects.append(frame_rect)
-            if not frame.transcript:
-                unfilled = UnfilledRegion(
-                    Rect(
-                        0, unfilled.get_last_unfilled_position(), page_width, max_height
-                    )
-                )
 
         return frame_rects

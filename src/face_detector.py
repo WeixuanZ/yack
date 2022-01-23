@@ -10,14 +10,14 @@ from structures import Rect
 class FaceDetector:
     def __init__(self):
         self.DETECTOR = dlib.get_frontal_face_detector()
-        self.PREDICTOR = dlib.shape_predictor(
-            (
-                Path(".")
-                / "src"
-                / "dlib_shape_predictor"
-                / "shape_predictor_68_face_landmarks.dat"
-            ).as_posix()
-        )
+        # self.PREDICTOR = dlib.shape_predictor(
+        #     (
+        #         Path(".")
+        #         / "src"
+        #         / "dlib_shape_predictor"
+        #         / "shape_predictor_68_face_landmarks.dat"
+        #     ).as_posix()
+        # )
 
     @staticmethod
     def dist(a, b):
@@ -44,15 +44,15 @@ class FaceDetector:
         max_y = 0
 
         for rect in rects:
-            shape = self.PREDICTOR(gray, rect)
-            shape = face_utils.shape_to_np(shape)
+            # shape = self.PREDICTOR(gray, rect)
+            # shape = face_utils.shape_to_np(shape)
 
-            mouth_open = max(
-                FaceDetector.dist(shape[61], shape[67]),
-                FaceDetector.dist(shape[62], shape[66]),
-                FaceDetector.dist(shape[63], shape[65]),
-            )
-            mouth_width = FaceDetector.dist(shape[54], shape[48])
+            # mouth_open = max(
+            #     FaceDetector.dist(shape[61], shape[67]),
+            #     FaceDetector.dist(shape[62], shape[66]),
+            #     FaceDetector.dist(shape[63], shape[65]),
+            # )
+            # mouth_width = FaceDetector.dist(shape[54], shape[48])
 
             (x, y, w, h) = face_utils.rect_to_bb(rect)
 
@@ -66,14 +66,14 @@ class FaceDetector:
             if y + h > max_y:
                 max_y = y + h
 
-            if (mouth_open / mouth_width) > speaker_mouth_ratio:
-                speaker_mouth_ratio = mouth_open / mouth_width
-                speaker_face = Rect(
-                    x,
-                    y,
-                    w,
-                    h,
-                )
+            # if (mouth_open / mouth_width) > speaker_mouth_ratio:
+            #     speaker_mouth_ratio = mouth_open / mouth_width
+            #     speaker_face = Rect(
+            #         x,
+            #         y,
+            #         w,
+            #         h,
+            #     )
 
         if min_x > max_x:
             max_x = min_x

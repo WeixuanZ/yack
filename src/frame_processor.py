@@ -21,6 +21,7 @@ class StyleTransfer:
         return img
 
     def color_quantization(self, img, k):
+        return np.uint8(np.round(img * (k / 255)) * (255 / k))
         # Transform the image
         data = np.float32(img).reshape((-1, 3))
 

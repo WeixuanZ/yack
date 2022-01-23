@@ -1,3 +1,4 @@
+import pickle
 import asyncio
 import json
 import tempfile
@@ -152,9 +153,12 @@ def process_video(path: str) -> str:
         [Segment(**utterance_segment) for utterance_segment in utterances]
     )
 
-    for segment in segments:
-        segment.keyframe = None
-        segment.frames = None
+    if DEBUG:
+        for segment in segments:
+            segment.keyframe = None
+            segment.frames = None
+
+        pickle.dump(segments, open("cache.pickle", "wb+"))
 
     layout = LayoutGenerator()
     for segment in segments:
@@ -206,3 +210,10 @@ def submit_video_api():
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=8000, debug=True, threaded=True)
+    # process_video("spiderman.mp4")
+    # segments = pickle.load(open("cache.pickle", "rb"))
+    # layout = LayoutGenerator()
+    # for segment in segments:
+    #     layout.add_frame(segment)
+
+    # layout.render_frames_to_image("test.svg")

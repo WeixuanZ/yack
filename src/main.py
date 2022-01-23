@@ -69,21 +69,57 @@ def detect_speaker(segment: Segment) -> None:
 def crop_keyframe(segment: Segment) -> None:
     subject_bbox_center = segment.speakers_bbox.center
 
-    # TODO: add margins
+    PADDING = segment.keyframe.shape[0] * 0.2
 
-    if subject_bbox_center[0] > segment.keyframe.shape[0] // 2:
+    if subject_bbox_center[0] > segment.keyframe.shape[1] * 5 / 6:
         segment.keyframe = segment.keyframe[
-            :, : int(segment.speakers_bbox.x + segment.speakers_bbox.width), :
+            :,
+            : int(
+                min(
+                    segment.speakers_bbox.x + segment.speakers_bbox.width + PADDING,
+                    segment.keyframe.shape[1],
+                )
+            ),
+            :,
         ]
+        segment.speakers_bbox.x -= segment.keyframe.shape[1] - min(
+            segment.speakers_bbox.x + segment.speakers_bbox.width + PADDING,
+            segment.keyframe.shape[1],
+        )
+    elif subject_bbox_center[0] < segment.keyframe.shape[1] * 1 / 6:
+        segment.keyframe = segment.keyframe[
+            :, int(max(segment.speakers_bbox.x - PADDING, 0)) :, :
+        ]
+        segment.speakers_bbox.x -= int(max(segment.speakers_bbox.x - PADDING, 0))
     else:
-        segment.keyframe = segment.keyframe[:, int(segment.speakers_bbox.x) :, :]
+        if randint(0, 1):
+            segment.keyframe = segment.keyframe[
+                :,
+                : int(
+                    min(
+                        segment.speakers_bbox.x + segment.speakers_bbox.width + PADDING,
+                        segment.keyframe.shape[1],
+                    )
+                ),
+                :,
+            ]
+            segment.speakers_bbox.x -= segment.keyframe.shape[1] - min(
+                segment.speakers_bbox.x + segment.speakers_bbox.width + PADDING,
+                segment.keyframe.shape[1],
+            )
+        else:
+            segment.keyframe = segment.keyframe[
+                :, int(max(segment.speakers_bbox.x - PADDING, 0)) :, :
+            ]
+            segment.speakers_bbox.x -= int(max(segment.speakers_bbox.x - PADDING, 0))
 
-    if subject_bbox_center[1] > segment.keyframe.shape[1] // 2:
+    if randint(0, 1):
         segment.keyframe = segment.keyframe[
-            : int(segment.speakers_bbox.y + segment.speakers_bbox.height), :, :
+            : int(segment.keyframe.shape[1] * 3 / 4), :, :
         ]
-    else:
-        segment.keyframe = segment.keyframe[int(segment.speakers_bbox.y) :, :, :]
+        segment.speakers_bbox.y -= segment.keyframe.shape[1] - int(
+            segment.keyframe.shape[1] * 3 / 4
+        )
 
 
 def transfer_keyframe_style(segment: Segment) -> None:

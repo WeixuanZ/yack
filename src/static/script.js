@@ -15,6 +15,12 @@ async function upload(file) {
     const img = document.getElementById('image');
     img.src = img_url;
     img.classList.remove('d-none');
+
+    const form = document.getElementById('form');
+    form.remove();
+
+    const msg = document.getElementById('msg');
+    msg.innerText = 'Here you go!';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -28,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     button.addEventListener('click', event => {
         console.log(event);
 
-        //button.disabled = true;
+        button.disabled = true;
         button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
 
         upload(input.files[0]);

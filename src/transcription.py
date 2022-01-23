@@ -72,6 +72,8 @@ def split_utterances(
 
         # + 1 because the spaces between chunks are removed.
         if u_len <= width + min_width + 1:
+            if utterance["transcript"][-1] != ".":
+                utterance["transcript"] += "..."
             out.append(utterance)
             continue
 
@@ -82,20 +84,14 @@ def split_utterances(
             chunks[-2] += " " + chunks[-1]
             chunks.pop()
 
-        # Add ellipsis.
-        if chunks[0][-1] not in [".", "!"]:
-            chunks[0] += "..."
-
+        # Add leading ellipsis.
         for i in range(1, len(chunks)):
             chunks[i] = "..." + chunks[i]
-            if chunks[i][-1] not in [".", "!"]:
-                chunks[i] += "..."
 
         start = utterance["start"]
 
         # Add empty frames when there's no dialogue.
         if out:
-            print(start, out[-1]["end"])
             if start - out[-1]["end"] > pause_len:
                 out.append(
                     {
@@ -108,6 +104,13 @@ def split_utterances(
 
         for chunk in chunks:
             end = start + len(chunk) * u_time / u_len
+
+            # Add trailing ellipsis.
+            if chunk[-1] in [","]:
+                chunk += " "
+            if chunk[-1] not in [".", "!"]:
+                chunk += "..."
+
             out.append(
                 {
                     "start": start,
@@ -116,6 +119,7 @@ def split_utterances(
                     "speaker": utterance["speaker"],
                 }
             )
+
             start = end
 
     return out

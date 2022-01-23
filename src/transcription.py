@@ -72,7 +72,9 @@ def split_utterances(
 
         # + 1 because the spaces between chunks are removed.
         if u_len <= width + min_width + 1:
-            if utterance["transcript"][-1] != ".":
+            if utterance["transcript"][-1] in [","]:
+                utterance["transcript"] += " "
+            if utterance["transcript"][-1] not in [".", "!", "?"]:
                 utterance["transcript"] += "..."
             out.append(utterance)
             continue
@@ -108,7 +110,7 @@ def split_utterances(
             # Add trailing ellipsis.
             if chunk[-1] in [","]:
                 chunk += " "
-            if chunk[-1] not in [".", "!"]:
+            if chunk[-1] not in [".", "!", "?"]:
                 chunk += "..."
 
             out.append(

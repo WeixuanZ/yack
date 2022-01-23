@@ -4,7 +4,7 @@ LABEL description="Docker image for YACK"
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt update
-RUN apt install -y python3-pip python3-dev cmake ffmpeg libsm6 libxext6
+RUN apt install -y python3-pip python3-dev cmake ffmpeg libsm6 libxext6 wget
 
 COPY ./requirements.txt /app/requirements.txt
 

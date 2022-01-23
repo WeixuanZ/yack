@@ -4,12 +4,13 @@ import drawSvg as draw
 import numpy as np
 
 from structures import ImageData, Rect, Segment
+from text_box import create_text_bubble
 
 COMIC_WIDTH = 500
 COMIC_MAX_SEGMENT_HEIGHT = 180
 COMIC_SPACING_TOLERANCE = 0.2
 COMIC_AREA_MIN = 100 * 100
-COMIC_PADDING = 5
+COMIC_PADDING = 8
 COMIC_BORDER_WIDTH = 2
 BODGE_PT_TO_PX_CONVERSION_X = 6
 BODGE_PT_TO_PX_CONVERSION_Y = 10
@@ -113,8 +114,6 @@ class LayoutGenerator:
                 COMIC_WIDTH,
                 height,
                 fill="#fff",
-                stroke="#000",
-                stroke_width=2 * COMIC_BORDER_WIDTH,
             )
         )
         for rect, frame in zip(frame_rects, self.frames):
@@ -160,15 +159,7 @@ class LayoutGenerator:
             text_box = suggest_textbox_location(
                 normalized_frame_rect, text_box_lines, frame.image
             )
-            ctx.append(
-                draw.Rectangle(
-                    text_box.x,
-                    text_box.y,
-                    text_box.width,
-                    text_box.height,
-                    fill="white",
-                )
-            )
+            create_text_bubble(ctx, text_box, frame.speakers_bbox)
 
             ctx.append(
                 draw.Text(

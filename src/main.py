@@ -198,12 +198,13 @@ def submit_video_api():
 
     _, path = tempfile.mkstemp(prefix="in", dir=app.config["UPLOAD_FOLDER"])
 
-    data = request.files["file"]
-    data.save(path)
+    try:
+        data = request.files["file"]
+        data.save(path)
 
-    comic_name = process_video(path)
-
-    Path(path).unlink()
+        comic_name = process_video(path)
+    finally:
+        Path(path).unlink()
 
     return redirect(url_for("uploads", name=comic_name))
 

@@ -1,3 +1,4 @@
+import string
 from contextlib import suppress
 from textwrap import wrap
 from typing import OrderedDict
@@ -80,6 +81,15 @@ def split_utterances(utterances: list, width: int = 50, min_width: int = 20) -> 
             chunks.pop()
 
         start = utterance["start"]
+
+        # Add ellipsis.
+        if chunks[0][-1] not in [".", "!"]:
+            chunks[0] += "..."
+
+        for i in range(1, len(chunks)):
+            chunks[i] = "..." + chunks[i]
+            if chunks[i][-1] not in [".", "!"]:
+                chunks[i] += "..."
 
         for chunk in chunks:
             end = start + len(chunk) * u_time / u_len

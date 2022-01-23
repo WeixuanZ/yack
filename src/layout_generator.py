@@ -73,8 +73,12 @@ class LayoutGenerator:
         frame_rects = self.__get_frame_rects_for_rendering(
             COMIC_WIDTH, COMIC_MAX_SEGMENT_HEIGHT
         )
+        height = (
+            frame_rects[-1].y
+            + COMIC_MAX_SEGMENT_HEIGHT
+            + 2 * (COMIC_BORDER_WIDTH + COMIC_PADDING)
+        )
 
-        height = 2000
         ctx = draw.Drawing(
             COMIC_WIDTH + 2 * COMIC_BORDER_WIDTH,
             height,

@@ -57,13 +57,16 @@ def get_key_frame_index(segment: Segment) -> None:
     segment.keyframe_index = randint(0, segment.frames.shape[0] - 1)
 
 
-def detect_speaker(segment: Segment) -> None:
+def detect_speaker() -> None:
     face_detector = FaceDetector()
 
-    segment.keyframe = segment.frames[segment.keyframe_index]
-    segment.speaker_location, segment.speakers_bbox = face_detector.find_speaker_face(
-        segment.keyframe
-    )
+    def face_detector(segment: Segment):
+        segment.keyframe = segment.frames[segment.keyframe_index]
+        segment.speaker_location, segment.speakers_bbox = face_detector.find_speaker_face(
+            segment.keyframe
+        )
+
+    return face_detector
 
 
 def crop_keyframe(segment: Segment) -> None:
@@ -144,7 +147,7 @@ def process_video(path: str) -> str:
     pipeline = pipe(
         attach_frames(video),
         get_key_frame_index,
-        detect_speaker,
+        detect_speaker(),
         crop_keyframe,
         transfer_keyframe_style,
         convert_keyframe_to_obj,

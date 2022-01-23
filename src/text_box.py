@@ -12,7 +12,7 @@ BODGE_PT_TO_PX_CONVERSION_Y = 10
 def suggest_textbox_location(
     normalized_frame_rect: Rect, wrapped_textbox_lines, image: ImageData
 ):
-    width = len(wrapped_textbox_lines[0]) * BODGE_PT_TO_PX_CONVERSION_X
+    width = max(map(len, wrapped_textbox_lines)) * BODGE_PT_TO_PX_CONVERSION_X
     height = len(wrapped_textbox_lines) * BODGE_PT_TO_PX_CONVERSION_Y
 
     left_space = image.subject.x

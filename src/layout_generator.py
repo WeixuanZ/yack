@@ -4,7 +4,7 @@ import numpy as np
 from structures import ImageData, Rect, Segment
 from text_box import create_text_bubble
 
-COMIC_WIDTH = 500
+COMIC_WIDTH = 450
 COMIC_MAX_SEGMENT_HEIGHT = 180
 COMIC_SPACING_TOLERANCE = 0.2
 COMIC_AREA_MIN = 100 * 100
@@ -128,8 +128,8 @@ class LayoutGenerator:
                     fill="rgba(0, 0, 0, 0)",
                 )
             )
-
-            create_text_bubble(ctx, frame, normalized_frame_rect)
+            if frame.transcript:
+                create_text_bubble(ctx, frame, normalized_frame_rect)
 
         ctx.setPixelScale(1)
         ctx.saveSvg(file_name)

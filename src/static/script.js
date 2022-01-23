@@ -4,23 +4,30 @@ async function upload(file) {
     const data = new FormData()
     data.append('file', file)
 
+    let status = 'Here you go!';
+
     const response = await fetch('/api/submit', {
         method: 'POST',
         body: data
     });
 
-    const img_blob = await response.blob();
-    const img_url = URL.createObjectURL(img_blob);
+    if (!response.ok) {
+        status = `Upload failed. Error: ${response.statusText}.`;
+    }
+    else {
+        const img_blob = await response.blob();
+        const img_url = URL.createObjectURL(img_blob);
 
-    const img = document.getElementById('image');
-    img.src = img_url;
-    img.classList.remove('d-none');
+        const img = document.getElementById('image');
+        img.src = img_url;
+        img.classList.remove('d-none');
+    }
 
     const form = document.getElementById('form');
     form.remove();
 
     const msg = document.getElementById('msg');
-    msg.innerText = 'Here you go!';
+    msg.innerText = status;
 }
 
 document.addEventListener('DOMContentLoaded', () => {

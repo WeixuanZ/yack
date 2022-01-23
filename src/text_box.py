@@ -59,6 +59,7 @@ def create_text_bubble(ctx, frame: Segment, normalized_frame_rect: Rect):
             y=text_bb.y + text_bb.height,
             fill="#000",
             valign="top",
+            font_family="Comic Sans MS",
         )
     )
 

@@ -7,13 +7,14 @@ from structures import ImageData, Rect, Segment
 BUBBLE_PADDING = 6
 BODGE_PT_TO_PX_CONVERSION_X = 6
 BODGE_PT_TO_PX_CONVERSION_Y = 10
+SPEAKER_COLORS = ["black", "blue", "red", "purple"]
 
 
 def suggest_textbox_location(
     normalized_frame_rect: Rect, wrapped_textbox_lines, image: ImageData
 ):
     width = max(map(len, wrapped_textbox_lines)) * BODGE_PT_TO_PX_CONVERSION_X
-    height = len(wrapped_textbox_lines) * BODGE_PT_TO_PX_CONVERSION_Y
+    height = (len(wrapped_textbox_lines) + 0.5) * BODGE_PT_TO_PX_CONVERSION_Y
 
     left_space = image.subject.x
     right_space = image.rect.width - image.subject.x + image.subject.width
@@ -24,7 +25,7 @@ def suggest_textbox_location(
     else:
         return Rect(
             normalized_frame_rect.x + normalized_frame_rect.width - width,
-            normalized_frame_rect.y + height,
+            normalized_frame_rect.y,
             width,
             height,
         )
@@ -57,7 +58,7 @@ def create_text_bubble(ctx, frame: Segment, normalized_frame_rect: Rect):
             10,
             x=text_bb.x,
             y=text_bb.y + text_bb.height,
-            fill="#000",
+            fill=SPEAKER_COLORS[frame.speaker],
             valign="top",
             font_family="Comic Sans MS",
         )
@@ -73,7 +74,6 @@ def create_text_bubble(ctx, frame: Segment, normalized_frame_rect: Rect):
 
 
 if __name__ == "__main__":
-
     height = 100
     ctx = draw.Drawing(100, height, origin=(0, 0), displayInline=False)
     create_text_bubble(ctx, Rect(10, 10, 70, 40), Rect(0, 50, 50, 50))

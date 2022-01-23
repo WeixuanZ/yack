@@ -1,5 +1,4 @@
 import asyncio
-import pickle
 import json
 import tempfile
 from pathlib import Path
@@ -29,6 +28,7 @@ DEBUG = True
 
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = (Path(".") / "uploads").resolve()
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1000 * 1000  # Limit uploads to 16 MB.
 
 
 def pipe(
@@ -133,7 +133,7 @@ def convert_keyframe_to_obj(segment: Segment) -> None:
     )
 
 
-def process_video(path: Path) -> str:
+def process_video(path: str) -> str:
     video = Video(path, fps=2)
     utterances = split_utterances(asyncio.run(transcribe(video.audio)))
 
@@ -194,12 +194,14 @@ def submit_video_api():
         return abort(400)
 
     _, path = tempfile.mkstemp(prefix="in", dir=app.config["UPLOAD_FOLDER"])
-    print(path)
 
     data = request.files["file"]
     data.save(path)
 
     comic_name = process_video(path)
+
+    Path(path).unlink()
+
     return redirect(url_for("uploads", name=comic_name))
 
 

@@ -128,6 +128,7 @@ class LayoutGenerator:
                     fill="rgba(0, 0, 0, 0)",
                 )
             )
+
             if frame.transcript:
                 create_text_bubble(ctx, frame, normalized_frame_rect)
 

@@ -98,7 +98,7 @@ def convert_keyframe_to_obj(segment: Segment) -> None:
 
 
 def process_video(path: Path) -> str:
-    video = Video(path)
+    video = Video(path, fps=2)
     utterances = split_utterances(asyncio.run(transcribe(video.audio)))
 
     if DEBUG:

@@ -1,11 +1,43 @@
+import textwrap
+
 import drawSvg as draw
-from structures import Rect
+
+from structures import ImageData, Rect, Segment
 
 BUBBLE_PADDING = 6
+BODGE_PT_TO_PX_CONVERSION_X = 6
+BODGE_PT_TO_PX_CONVERSION_Y = 10
 
 
-def create_text_bubble(drawing_obj, text_bb: Rect, speaker_bb: Rect):
-    drawing_obj.append(
+def suggest_textbox_location(
+    normalized_frame_rect: Rect, wrapped_textbox_lines, image: ImageData
+):
+    width = len(wrapped_textbox_lines[0]) * BODGE_PT_TO_PX_CONVERSION_X
+    height = len(wrapped_textbox_lines) * BODGE_PT_TO_PX_CONVERSION_Y
+
+    left_space = image.subject.x
+    right_space = image.rect.width - image.subject.x + image.subject.width
+    if left_space > right_space:
+        return Rect(
+            normalized_frame_rect.x, normalized_frame_rect.y + height, width, height
+        )
+    else:
+        return Rect(
+            normalized_frame_rect.x + normalized_frame_rect.width - width,
+            normalized_frame_rect.y + height,
+            width,
+            height,
+        )
+
+
+def create_text_bubble(ctx, frame: Segment, normalized_frame_rect: Rect):
+    # Get the textbox location
+    text_box_lines = textwrap.wrap(frame.transcript, 15)
+    text_bb = suggest_textbox_location(
+        normalized_frame_rect, text_box_lines, frame.image
+    )
+
+    ctx.append(
         draw.Rectangle(
             x=text_bb.x - BUBBLE_PADDING,
             y=text_bb.y - BUBBLE_PADDING,
@@ -16,6 +48,17 @@ def create_text_bubble(drawing_obj, text_bb: Rect, speaker_bb: Rect):
             fill="white",
             stroke="black",
             stroke_width=2,
+        )
+    )
+
+    ctx.append(
+        draw.Text(
+            text_box_lines,
+            10,
+            x=text_bb.x,
+            y=text_bb.y + text_bb.height,
+            fill="#000",
+            valign="top",
         )
     )
 

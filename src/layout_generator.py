@@ -1,5 +1,3 @@
-import textwrap
-
 import drawSvg as draw
 import numpy as np
 
@@ -12,29 +10,6 @@ COMIC_SPACING_TOLERANCE = 0.2
 COMIC_AREA_MIN = 100 * 100
 COMIC_PADDING = 8
 COMIC_BORDER_WIDTH = 2
-BODGE_PT_TO_PX_CONVERSION_X = 6
-BODGE_PT_TO_PX_CONVERSION_Y = 10
-
-
-def suggest_textbox_location(
-    normalized_frame_rect: Rect, wrapped_textbox_lines, image: ImageData
-):
-    width = len(wrapped_textbox_lines[0]) * BODGE_PT_TO_PX_CONVERSION_X
-    height = len(wrapped_textbox_lines) * BODGE_PT_TO_PX_CONVERSION_Y
-
-    left_space = image.subject.x
-    right_space = image.rect.width - image.subject.x + image.subject.width
-    if left_space > right_space:
-        return Rect(
-            normalized_frame_rect.x, normalized_frame_rect.y + height, width, height
-        )
-    else:
-        return Rect(
-            normalized_frame_rect.x + normalized_frame_rect.width - width,
-            normalized_frame_rect.y + height,
-            width,
-            height,
-        )
 
 
 class UnfilledRegion:
@@ -154,23 +129,7 @@ class LayoutGenerator:
                 )
             )
 
-            # Get the textbox location
-            text_box_lines = textwrap.wrap(frame.transcript, 15)
-            text_box = suggest_textbox_location(
-                normalized_frame_rect, text_box_lines, frame.image
-            )
-            create_text_bubble(ctx, text_box, frame.speakers_bbox)
-
-            ctx.append(
-                draw.Text(
-                    text_box_lines,
-                    10,
-                    x=text_box.x,
-                    y=text_box.y + text_box.height,
-                    fill="#000",
-                    valign="top",
-                )
-            )
+            create_text_bubble(ctx, frame, normalized_frame_rect)
 
         ctx.setPixelScale(1)
         ctx.saveSvg(file_name)

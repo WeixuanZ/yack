@@ -12,7 +12,13 @@ async function upload(file) {
     });
 
     if (!response.ok) {
-        status = `Upload failed. Error: ${response.statusText}.`;
+        if (response.status == 413) {
+            // File too long.
+            status = 'Selected file is too long (max 16 MB)'
+        }
+        else {
+            status = `Upload failed. Error: ${response.statusText}.`;
+        }
     }
     else {
         const img_blob = await response.blob();

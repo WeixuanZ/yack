@@ -20,3 +20,8 @@ Alternatively, create a virtual environment, and use
 ```shell
 make install
 ```
+
+## Sample comic
+![Thanos webcomic](demo/thanos.png)
+
+"They called me a Mad Man", source: https://youtu.be/fzGBRDpf5GU?t=102

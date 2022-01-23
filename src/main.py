@@ -14,7 +14,6 @@ from flask import (
     send_from_directory,
     url_for,
 )
-from werkzeug.utils import secure_filename
 
 from face_detector import FaceDetector
 from frame_processor import StyleTransfer

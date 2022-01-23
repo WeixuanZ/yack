@@ -1,7 +1,6 @@
 import drawSvg as draw
-import numpy as np
 
-from structures import ImageData, Rect, Segment
+from structures import Rect, Segment
 from text_box import create_text_bubble
 
 COMIC_WIDTH = 450
@@ -170,47 +169,3 @@ class LayoutGenerator:
                 )
 
         return frame_rects
-
-
-if __name__ == "__main__":
-    data1 = Segment(
-        0,
-        0,
-        "Hello world",
-        0,
-        None,
-        0,
-        ImageData(np.zeros((200, 100)), Rect(40, 40, 50, 50)),
-        Rect(40, 40, 1, 1),
-    )
-    data2 = Segment(
-        0,
-        0,
-        "Hello world",
-        0,
-        None,
-        0,
-        ImageData(np.zeros((100, 100)), Rect(40, 40, 50, 50)),
-        Rect(40, 40, 1, 1),
-    )
-    data3 = Segment(
-        0,
-        0,
-        "Hello world",
-        0,
-        None,
-        0,
-        ImageData(np.zeros((100, 200)), Rect(40, 40, 50, 50)),
-        Rect(40, 40, 1, 1),
-    )
-
-    layout = LayoutGenerator()
-    layout.add_frame(data1)
-    layout.add_frame(data2)
-    layout.add_frame(data1)
-    layout.add_frame(data3)
-    layout.add_frame(data2)
-    layout.add_frame(data1)
-    layout.add_frame(data3)
-
-    layout.render_frames_to_image("test.png", 400)

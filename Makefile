@@ -18,4 +18,8 @@ build:
 	docker build -t yack:latest .
 
 run: download-model build
-	docker run -e "DEEPGRAM_API_KEY=$(DEEPGRAM_API_KEY)" -p 8000:8000 yack
+	docker run -e "DEEPGRAM_API_KEY=$(DEEPGRAM_API_KEY)" -e "ENV=production" -p 8000:8000 yack
+
+push: build
+	docker tag yack:latest $(CONTAINER_REGISTRY)/yack:latest
+	docker push $(CONTAINER_REGISTRY)/yack:latest

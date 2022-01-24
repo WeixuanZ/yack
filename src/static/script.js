@@ -12,7 +12,7 @@ async function upload(file) {
     });
 
     if (!response.ok) {
-        if (response.status == 413) {
+        if (response.status === 413) {
             // File too long.
             status = 'Selected file is too long (max 16 MB)'
         }
@@ -41,12 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const button = document.getElementById('submit_button');
 
     input.addEventListener('change', event => {
-        button.disabled = (event.target.value == '');
+        button.disabled = (event.target.value === '');
     });
 
     button.addEventListener('click', event => {
-        console.log(event);
-
         button.disabled = true;
         button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
 

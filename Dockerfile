@@ -10,9 +10,9 @@ COPY ./requirements.txt /app/requirements.txt
 
 WORKDIR /app
 
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /app
 
 EXPOSE 8000
-CMD ["python3", "/app/src/main.py"]
+CMD ["gunicorn", "--bind", ":8000", "--workers", "2", "--threads", "8", "--timeout", "0", "--pythonpath", "./src", "main:app"]

@@ -1,3 +1,4 @@
+import os
 import pickle
 import asyncio
 import json
@@ -24,11 +25,12 @@ from structures import ImageData, Segment
 from transcription import split_utterances, transcribe
 from video_processor import Video
 
-DEBUG = True
+PRODUCTION = os.environ.get("ENV") == "production"
 
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = (Path(".") / "uploads").resolve()
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1000 * 1000  # Limit uploads to 16 MB.
+app.config["PREFERRED_URL_SCHEME"] = "https"
 
 
 def pipe(
@@ -57,16 +59,15 @@ def get_key_frame_index(segment: Segment) -> None:
     segment.keyframe_index = randint(0, segment.frames.shape[0] - 1)
 
 
-def detect_speaker() -> None:
-    face_detector = FaceDetector()
-
-    def face_detector(segment: Segment):
+def detect_speaker(face_detector: FaceDetector):
+    def face_detector_func(segment: Segment) -> None:
         segment.keyframe = segment.frames[segment.keyframe_index]
-        segment.speaker_location, segment.speakers_bbox = face_detector.find_speaker_face(
-            segment.keyframe
-        )
+        (
+            segment.speaker_location,
+            segment.speakers_bbox,
+        ) = face_detector.find_speaker_face(segment.keyframe)
 
-    return face_detector
+    return face_detector_func
 
 
 def crop_keyframe(segment: Segment) -> None:
@@ -140,14 +141,15 @@ def process_video(path: str) -> str:
     video = Video(path, fps=2)
     utterances = split_utterances(asyncio.run(transcribe(video.audio)))
 
-    if DEBUG:
+    if not PRODUCTION:
         with open("transcript.json", "w") as file:
             json.dump(utterances, file, indent=4)
 
+    face_detector = FaceDetector()
     pipeline = pipe(
         attach_frames(video),
         get_key_frame_index,
-        detect_speaker(),
+        detect_speaker(face_detector),
         crop_keyframe,
         transfer_keyframe_style,
         convert_keyframe_to_obj,
@@ -156,7 +158,7 @@ def process_video(path: str) -> str:
         [Segment(**utterance_segment) for utterance_segment in utterances]
     )
 
-    if DEBUG:
+    if not PRODUCTION:
         for segment in segments:
             segment.keyframe = None
             segment.frames = None
@@ -213,11 +215,4 @@ def submit_video_api():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000, debug=True, threaded=True)
-    # process_video("spiderman.mp4")
-    # segments = pickle.load(open("cache.pickle", "rb"))
-    # layout = LayoutGenerator()
-    # for segment in segments:
-    # layout.add_frame(segment)
-
-    # layout.render_frames_to_image("test.svg")
+    app.run(host="127.0.0.1", port=8000, debug=True, threaded=True)

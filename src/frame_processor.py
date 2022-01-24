@@ -20,8 +20,11 @@ class StyleTransfer:
         # TODO: add size and resolution standardization
         return img
 
-    def color_quantization(self, img, k):
-        return np.uint8(np.round(img * (k / 255)) * (255 / k))
+    @staticmethod
+    def color_quantization(img, k, fast=True):
+        if fast:
+            return np.uint8(np.round(img * (k / 255)) * (255 / k))
+
         # Transform the image
         data = np.float32(img).reshape((-1, 3))
 
@@ -34,8 +37,7 @@ class StyleTransfer:
         )
         center = np.uint8(center)
         result = center[label.flatten()]
-        result = result.reshape(img.shape)
-        return result
+        return result.reshape(img.shape)
 
     def edge_mask(self, img):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

@@ -23,8 +23,11 @@ class Video:
         )
         if self.audio_info is None:
             raise RuntimeError("Video does not have audio")
+
         if self.fps > truediv(*map(int, self.video_info["avg_frame_rate"].split("/"))):
-            print("[WARNING] Specified fps higher than raw")
+            raise RuntimeError("Specified fps higher than raw")
+        if float(self.video_info["duration"]) > 120:
+            raise RuntimeError("Video longer than 120 seconds")
 
         if not audio_only:
             self.frames = self.load_frames(
@@ -37,6 +40,7 @@ class Video:
         out, _ = (
             ffmpeg.input(path)
             .filter("fps", fps)
+            .filter("scale", width, height)
             .output("pipe:", format="rawvideo", pix_fmt="bgr24")
             .run(capture_stdout=True, capture_stderr=True)
         )
@@ -61,5 +65,6 @@ class Video:
 
 
 if __name__ == "__main__":
-    video = Video("test.mp4", fps=5)
+    video = Video("metaverse_short.mp4", fps=5)
     print(video.frames.shape)
+    print(video.video_info)

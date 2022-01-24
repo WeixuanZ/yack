@@ -211,6 +211,11 @@ def submit_video_api():
     finally:
         Path(path).unlink()
 
+    if PRODUCTION:
+        return redirect(
+            url_for("uploads", name=comic_name, _external=True, _scheme="https")
+        )
+
     return redirect(url_for("uploads", name=comic_name))
 
 

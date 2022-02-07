@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 import cv2
 
@@ -12,11 +14,11 @@ class FaceDetector:
 class FaceDetectorDNN(FaceDetector):
     def __init__(
         self,
-        model="opencv_face_detector_uint8.pb",
-        config="opencv_face_detector.pbtxt",
+        model_path=Path("opencv_model", "opencv_face_detector_uint8.pb"),
+        config_path=Path("opencv_model", "opencv_face_detector.pbtxt"),
         detection_threshold=0.5,
     ):
-        self.model = cv2.dnn.readNetFromTensorflow(model, config)
+        self.model = cv2.dnn.readNetFromTensorflow(str(model_path), str(config_path))
         self.detection_threshold = detection_threshold
 
     def find_speaker_face(self, frame):
@@ -58,8 +60,10 @@ class FaceDetectorDNN(FaceDetector):
 
 
 class FaceDetectorCascade(FaceDetector):
-    def __init__(self, model="haarcascade_frontalface_default.xml"):
-        self.model = cv2.CascadeClassifier(model)
+    def __init__(
+        self, model_path=Path("opencv_model", "haarcascade_frontalface_default.xml")
+    ):
+        self.model = cv2.CascadeClassifier(str(model_path))
 
     def find_speaker_face(self, frame):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)

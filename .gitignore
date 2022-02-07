@@ -132,3 +132,7 @@ cython_debug/
 uploads/
 *.dat
 *.pickle
+#   OpenCV model files
+haarcascade_frontalface_default.xml
+*.pb
+*.pbtxt

@@ -14,6 +14,7 @@ COMIC_BORDER_WIDTH = 2
 class UnfilledRegion:
     def __init__(self, region) -> None:
         self.unfilled = Rect(region.x, region.y, region.width, region.height)
+        self.first_chunk_claimed = False
 
     def get_remaining_unfilled_rect(self):
         return self.unfilled
@@ -50,16 +51,25 @@ class UnfilledRegion:
 
         v_error = get_chunked_error(v_chunking)
         h_error = get_chunked_error(h_chunking)
-        if v_error <= h_error and v_error < tolerance and v_chunking.area > min_area:
-            self.unfilled.y += v_chunking.height
-            self.unfilled.height -= v_chunking.height
-            return v_chunking
-        elif v_error > h_error and h_error < tolerance and h_chunking.area > min_area:
-            self.unfilled.x += h_chunking.width
-            self.unfilled.width -= h_chunking.width
-            return h_chunking
-        else:
-            return None
+        if v_error <= h_error:
+            if not self.first_chunk_claimed or (
+                v_error < tolerance and v_chunking.area > min_area
+            ):
+                self.unfilled.y += v_chunking.height
+                self.unfilled.height -= v_chunking.height
+                self.first_chunk_claimed = True
+                return v_chunking
+
+        if h_error <= v_error:
+            if not self.first_chunk_claimed or (
+                h_error < tolerance and h_chunking.area > min_area
+            ):
+                self.unfilled.x += h_chunking.width
+                self.unfilled.width -= h_chunking.width
+                self.first_chunk_claimed = True
+                return h_chunking
+
+        return None
 
 
 class LayoutGenerator:

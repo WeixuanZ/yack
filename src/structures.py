@@ -47,7 +47,6 @@ class Segment:
         frames: np.ndarray = None,
         keyframe_index: int = None,
         keyframe: np.ndarray = None,
-        speaker_location: Rect = None,
         speakers_bbox: Rect = None,
         image: ImageData = None,
     ):
@@ -59,6 +58,5 @@ class Segment:
         self.frames = frames
         self.keyframe_index = keyframe_index
         self.keyframe = keyframe
-        self.speaker_location = speaker_location
         self.speakers_bbox = speakers_bbox
         self.image = image

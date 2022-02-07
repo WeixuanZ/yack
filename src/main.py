@@ -17,7 +17,7 @@ from flask import (
     url_for,
 )
 
-from face_detector import FaceDetector
+from face_detector import FaceDetector, FaceDetectorDNN
 from frame_processor import StyleTransfer
 
 from layout_generator import LayoutGenerator
@@ -62,10 +62,7 @@ def get_key_frame_index(segment: Segment) -> None:
 def detect_speaker(face_detector: FaceDetector):
     def face_detector_func(segment: Segment) -> None:
         segment.keyframe = segment.frames[segment.keyframe_index]
-        (
-            segment.speaker_location,
-            segment.speakers_bbox,
-        ) = face_detector.find_speaker_face(segment.keyframe)
+        segment.speakers_bbox = face_detector.find_speaker_face(segment.keyframe)
 
     return face_detector_func
 
@@ -145,7 +142,7 @@ def process_video(path: str) -> str:
         with open("transcript.json", "w") as file:
             json.dump(utterances, file, indent=4)
 
-    face_detector = FaceDetector()
+    face_detector = FaceDetectorDNN()
     pipeline = pipe(
         attach_frames(video),
         get_key_frame_index,
@@ -220,4 +217,4 @@ def submit_video_api():
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=8000, debug=True, threaded=True)
+    app.run(host="127.0.0.1", port=8081, debug=True, threaded=True)

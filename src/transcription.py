@@ -1,11 +1,11 @@
+import os
 from contextlib import suppress
 from textwrap import wrap
-from typing import OrderedDict
 
 from deepgram import Deepgram
-from dotenv import dotenv_values
+from dotenv import load_dotenv
 
-secrets: OrderedDict = dotenv_values(".secrets")
+load_dotenv(".secrets")
 
 
 def delete_keys(transcript: dict, keys: list):
@@ -40,7 +40,7 @@ def validate_transcript(transcript: dict):
 
 
 async def transcribe(audio: bytes) -> list:
-    dg_client = Deepgram(secrets["DEEPGRAM_API_KEY"])
+    dg_client = Deepgram(os.getenv("DEEPGRAM_API_KEY"))
 
     source = {"buffer": audio, "mimetype": "audio/wav"}
 

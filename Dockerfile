@@ -7,10 +7,10 @@ RUN apt update && apt install -y ffmpeg libsm6 libxext6
 WORKDIR /app
 RUN mkdir /app/uploads
 
-COPY ./requirements.txt /app/requirements.txt
+COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ./src/ /app/src/
+COPY src/ /app/src/
 ADD https://github.com/spmallick/learnopencv/raw/master/AgeGender/opencv_face_detector_uint8.pb                     /app/opencv_model/
 ADD https://raw.githubusercontent.com/spmallick/learnopencv/master/AgeGender/opencv_face_detector.pbtxt             /app/opencv_model/
 ADD https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/haarcascade_frontalface_default.xml    /app/opencv_model/

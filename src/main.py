@@ -30,7 +30,7 @@ PRODUCTION = os.environ.get("ENV") == "production"
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = (Path(".") / "uploads").resolve()
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1000 * 1000  # Limit uploads to 16 MB.
-app.config["PREFERRED_URL_SCHEME"] = "https"
+app.config["PREFERRED_URL_SCHEME"] = "https" if PRODUCTION else "http"
 
 
 def pipe(

@@ -8,17 +8,21 @@ install: download-model
 	pre-commit install
 
 download-model:
-	if [ ! -f "$(DIR)/src/dlib_shape_predictor/shape_predictor_68_face_landmarks.dat" ]; then \
-		wget http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2; \
-		bzip2 -d shape_predictor_68_face_landmarks.dat.bz2; \
-		mv shape_predictor_68_face_landmarks.dat $(DIR)/src/dlib_shape_predictor/; \
+	if [ ! -f "$(DIR)/opencv_model/opencv_face_detector_uint8.pb" ]; then \
+		wget https://github.com/spmallick/learnopencv/raw/master/AgeGender/opencv_face_detector_uint8.pb -P "$(DIR)/opencv_model/"; \
+	fi;
+	if [ ! -f "$(DIR)/opencv_model/opencv_face_detector.pbtxt" ]; then \
+		wget https://raw.githubusercontent.com/spmallick/learnopencv/master/AgeGender/opencv_face_detector.pbtxt -P "$(DIR)/opencv_model/"; \
+	fi;
+	if [ ! -f "$(DIR)/opencv_model/haarcascade_frontalface_default.xml" ]; then \
+		wget https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/haarcascade_frontalface_default.xml -P "$(DIR)/opencv_model/"; \
 	fi;
 
 build:
 	docker build -t yack:latest .
 
-run: download-model build
-	docker run -e "DEEPGRAM_API_KEY=$(DEEPGRAM_API_KEY)" -e "ENV=production" -p 8000:8000 yack
+run: build
+	docker run --rm -e "DEEPGRAM_API_KEY=$(DEEPGRAM_API_KEY)" -e "ENV=development" -p 8000:8000 yack
 
 push: build
 	docker tag yack:latest $(CONTAINER_REGISTRY)/yack:latest

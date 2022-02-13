@@ -17,7 +17,7 @@ from flask import (
     url_for,
 )
 
-from face_detector import FaceDetector
+from face_detector import FaceDetector, FaceDetectorDNN
 from frame_processor import StyleTransfer
 
 from layout_generator import LayoutGenerator
@@ -30,7 +30,7 @@ PRODUCTION = os.environ.get("ENV") == "production"
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = (Path(".") / "uploads").resolve()
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1000 * 1000  # Limit uploads to 16 MB.
-app.config["PREFERRED_URL_SCHEME"] = "https"
+app.config["PREFERRED_URL_SCHEME"] = "https" if PRODUCTION else "http"
 
 
 def pipe(
@@ -62,10 +62,7 @@ def get_key_frame_index(segment: Segment) -> None:
 def detect_speaker(face_detector: FaceDetector):
     def face_detector_func(segment: Segment) -> None:
         segment.keyframe = segment.frames[segment.keyframe_index]
-        (
-            segment.speaker_location,
-            segment.speakers_bbox,
-        ) = face_detector.find_speaker_face(segment.keyframe)
+        segment.speakers_bbox = face_detector.find_speaker_face(segment.keyframe)
 
     return face_detector_func
 
@@ -145,7 +142,7 @@ def process_video(path: str) -> str:
         with open("transcript.json", "w") as file:
             json.dump(utterances, file, indent=4)
 
-    face_detector = FaceDetector()
+    face_detector = FaceDetectorDNN()
     pipeline = pipe(
         attach_frames(video),
         get_key_frame_index,

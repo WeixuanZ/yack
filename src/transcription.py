@@ -1,11 +1,13 @@
-import os
 from contextlib import suppress
+from os import getenv
 from textwrap import wrap
 
 from deepgram import Deepgram
-from dotenv import load_dotenv
 
-load_dotenv(".secrets")
+if getenv("DEEPGRAM_API_KEY") is None:
+    from dotenv import load_dotenv
+
+    load_dotenv(".secrets")
 
 
 def delete_keys(transcript: dict, keys: list):
@@ -40,7 +42,7 @@ def validate_transcript(transcript: dict):
 
 
 async def transcribe(audio: bytes) -> list:
-    dg_client = Deepgram(os.getenv("DEEPGRAM_API_KEY"))
+    dg_client = Deepgram(getenv("DEEPGRAM_API_KEY"))
 
     source = {"buffer": audio, "mimetype": "audio/wav"}
 
